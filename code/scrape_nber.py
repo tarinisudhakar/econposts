@@ -12,13 +12,16 @@ posts = text.find_all("p")
    
 clean_posts = posts[2:-2]
 
-final_posts = re.sub("(<!--.*?-->)", "", str(clean_posts))
+output = []
 
-# output = []
-# for n in range(len(clean_posts)):
-#     title = clean_posts[n].contents[0] if clean_posts[n].contents[0] else "titlemissing"
-#     researcher = clean_posts[n].contents[2] if clean_posts[n].contents[2] else "researchermissing"
-#     institution = clean_posts[n].contents[5] if clean_posts[n].contents[5] else "instmissing"
-#     research_field = clean_posts[n].contents[7] if clean_posts[n].contents[7] else "fieldmissing"
-#     link = clean_posts[n].a["href"] if clean_posts[n].a["href"] else "linkmissing"
-#     output.append([title, researcher, institution, research_field, link])
+for i, v in enumerate(clean_posts): 
+    print("index:{}".format(i))
+    if v.contents[0] != '\xa0' and not str(v.contents[0]).startswith('<em><!--'):
+        title = v.contents[0] if v.contents[0] else "titlemissing"
+        researcher = v.contents[2] if v.contents[2] else "researchermissing"
+        institution = v.contents[5] if v.contents[5] else "instmissing"
+        research_field = v.contents[7] if v.contents[7] else "fieldmissing"
+        link = v.a["href"] if v.a["href"] else "linkmissing"
+        output.append([title, researcher, institution, research_field, link])
+
+df = pd.DataFrame(output, columns =['Title', 'Researcher', 'Institution', 'Research Field', 'Link'])
