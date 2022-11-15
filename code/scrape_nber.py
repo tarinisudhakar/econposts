@@ -1,6 +1,11 @@
 import requests
 from bs4 import BeautifulSoup 
 import re
+import pandas as pd
+import gspread
+from df2gspread import df2gspread as d2g
+from oauth2client.service_account import ServiceAccountCredentials
+import os 
 
 """Takes the RA listings on the NBER website that are not at the NBER and returns job title, NBER-sponsored researcher, institution, research field, and link to job posting"""
 
@@ -25,3 +30,26 @@ for i, v in enumerate(clean_posts):
         output.append([title, researcher, institution, research_field, link])
 
 df = pd.DataFrame(output, columns =['Title', 'Researcher', 'Institution', 'Research Field', 'Link'])
+
+df['Title'] = df['Title'].str.replace(r'<[^<>]*>', '', regex=True)
+df['Researcher'] = df['Researcher'].str.replace(r'<[^<>]*>', '', regex=True)
+df['Institution'] = df['Institution'].str.replace(r'[][]+', '', regex=True)
+df['Research Field'] = df['Research Field'].str.replace(r'<[^<>]*>', '', regex=True)
+df['Link'] = df['Link'].str.replace(r'<[^<>]*>', '', regex=True)
+
+#print(df['Institution'])
+
+#"""Uploading to Google Sheets""" 
+# INPUT_DIR = "code"
+# INPUT_PATH = os.path.join(INPUT_DIR, "econpostscred.json")
+
+# scope = ['https://spreadsheets.google.com/feeds',
+#          'https://www.googleapis.com/auth/drive']
+# credentials = ServiceAccountCredentials.from_json_keyfile_name(
+#     INPUT_PATH, scope)
+# gc = gspread.authorize(credentials)
+
+
+# spreadsheet_key = '1X-R8QVhi2ngDTquGgpTwH_Vquj7DCFwROLhX2rQtEl4'
+# wks_name = 'nber'
+# d2g.upload(df, spreadsheet_key, wks_name, credentials=credentials, row_names=True)
