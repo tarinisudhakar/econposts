@@ -8,6 +8,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import os
 import schedule 
 import time
+from collections import defaultdict
 
 def nber_list():
     """Takes the RA listings on the NBER website that are not at the NBER and returns job title, NBER-sponsored researcher, institution, research field, and link to job posting"""
@@ -20,44 +21,38 @@ def nber_list():
        
     clean_posts = posts[2:-2]
 
-    output = []
-
+    joke = []
+    dic = defaultdict(list)
     for i, v in enumerate(clean_posts): 
         if v.contents[0] != '\xa0' and not str(v.contents[0]).startswith('<em><!--'):
-            title = v.contents[0] if v.contents[0] else "titlemissing"
-            researcher = v.contents[2] if v.contents[2] else "researchermissing"
-            institution = v.contents[5] if v.contents[5] else "instmissing"
-            research_field = v.contents[7] if v.contents[7] else "fieldmissing"
+            pure = v.text.split('\n')
             link = v.a["href"] if v.a["href"] else "linkmissing"
-            output.append([title, researcher, institution, research_field, link])
-    #print(output)
+            dic['JobTitle'].append(pure[0])
+            dic['Researcher'].append([item for item in pure if 'Sponsoring' in item][0] if [item for item in pure if 'Sponsoring' in item] else 'SponsoringMissing')
+            dic['Institution'].append([item for item in pure if 'Institution' in item][0] if [item for item in pure if 'Institution' in item] else 'InstitutionMissing')
+            dic['FieldofResearch'].append([item for item in pure if 'Field' in item][0] if [item for item in pure if 'Field' in item] else 'FieldMissing')
+            dic['JobLink'].append(link)
+            pure.append(link)
+            joke.append(pure)
+    
+    return dic 
 
-    return output
-
-def posts():
+def posts(dic):
     """Cleans the RA listings on the NBER website that are not at the NBER and returns job title, NBER-sponsored researcher, institution, research field, and link to job posting"""
 
-    df = pd.DataFrame(output, columns =['Title', 'Researcher', 'Institution', 'Research Field', 'Link'])
-
-    def researcher_util(x):
+    df = pd.DataFrame(dic, columns =['JobTitle', 'Researcher', 'Institution', 'FieldofResearch', 'JobLink'])
+    
+    def split_util(x):
         return x.split(':')[1].strip() if x.find(':') > 0 else ' '.join(x.split()[-2:])
 
-    def field_util(x):
-        return x.split(':')[1].strip() if x.find(':') > 0 else ' '.join(x.split()[-2:])
-
-
-    df['Title'] = df['Title'].str.replace(r'<[^<>]*>', '', regex=True)
-    df['Researcher'] = df['Researcher'].astype(str).apply(lambda row: researcher_util(row))
-    df['Institution'] = df['Institution'].astype(str).apply(lambda s: re.sub('<em>|</em>|\xa0|<i>|</i>', '', s).strip() if s and s != 'instmissing' else None)
-    df['Research Field'] = df['Research Field'].astype(str).apply(lambda row: field_util(row))
-    df['Link'] = df['Link'].str.replace(r'<[^<>]*>', '', regex=True)
-
-
-    df.set_index('Title')
+    df['Researcher'] = df['Researcher'].astype(str).apply(lambda row: split_util(row))
+    df['Institution'] = df['Institution'].astype(str).apply(lambda row: split_util(row))
+    df['FieldofResearch'] = df['FieldofResearch'].astype(str).apply(lambda row: split_util(row))   
     
     return df
 
-def upload_gsheets():
+
+def upload_gsheets(df):
     """Uploading to Google Sheets""" 
     INPUT_DIR = "code"
     INPUT_PATH = os.path.join(INPUT_DIR, "econpostscred.json")
@@ -71,31 +66,32 @@ def upload_gsheets():
 
     spreadsheet_key = '1X-R8QVhi2ngDTquGgpTwH_Vquj7DCFwROLhX2rQtEl4'
     wks_name = 'nber'
-    d2g.upload(df, spreadsheet_key, wks_name, credentials=credentials, row_names=True)
+    #d2g.upload(df, spreadsheet_key, wks_name, credentials=credentials, row_names=True)
+
+    sheet = client.open('https://docs.google.com/spreadsheets/d/1X-R8QVhi2ngDTquGgpTwH_Vquj7DCFwROLhX2rQtEl4/edit#gid=1146760227')
+    sheet_instance = sheet.get_worksheet(0)
+    sheet_instance.insert_rows(df.values.tolist())
 
 
-if __name__ == '__main__':
-    print('Starting to be cool!')
-    res = nber_list()
-    print('len is ', len(res))
-    res_posts = posts(res)
-    print('len res_tweets is ', len(res_tweets)) 
-    upload_gsheets(res_posts)
-    print('Update completed...')
-    print('I am done!')
+# if __name__ == '__main__':
+#     print('Starting to be cool!')
+#     result = nber_list()
+#     print('Length of data is ', len(result))
+#     posts = posts(result)
+#     print('Length of posts is ', len(posts)) 
+#     upload_gsheets(posts)
+#     print('Update completed...')
+#     print('I am done!')
 
-    schedule.every().day.at("8:00").do(nber_list)
-    schedule.every().day.at("8:10").do(upload_gsheets)
+# #     schedule.every().day.at("08:48").do(nber_list, result)
+# #     schedule.every().day.at("08:50").do(posts, posts)
+# #     schedule.every().day.at("08:52").do(upload_gsheets, posts)
 
-# # Loop so that the scheduling task
-# # keeps on running all time.
-    while True:
+# # # # Loop so that the scheduling task
+# # # # keeps on running all time.
+# #     while True:
  
-#     # Checks whether a scheduled task
-#     # is pending to run or not
-        schedule.run_pending()
-        time.sleep(1)
-
-
-schedule.every().day.at("10:25").do(nber_list)
-schedule.every().day.at("10:28").do(upload_gsheets)
+# # #     # Checks whether a scheduled task
+# # #     # is pending to run or not
+# #         schedule.run_pending()
+# #         time.sleep(1)

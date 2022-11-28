@@ -43,27 +43,32 @@ def upload_gsheets(tweets_df):
     spreadsheet_key = '1X-R8QVhi2ngDTquGgpTwH_Vquj7DCFwROLhX2rQtEl4'
     wks_name = 'twitter'
     #d2g.upload(tweets_df, spreadsheet_key, wks_name, credentials=credentials, row_names=True)
-    wks_name.update([tweets_df.columns.values.tolist()] + tweets_df.values.tolist())
+    #wks_name.update([tweets_df.columns.values.tolist()] + tweets_df.values.tolist())
 
-if __name__ == '__main__':
-    print('Starting to be cool!')
-    res = econ_ra()
-    print('len is ', len(res))
-    res_tweets = tweets(res)
-    print('len res_tweets is ', len(res_tweets)) 
-    upload_gsheets(res_tweets)
-    print('Update completed...')
-    print('I am done!')
+    sheet = client.open('https://docs.google.com/spreadsheets/d/1X-R8QVhi2ngDTquGgpTwH_Vquj7DCFwROLhX2rQtEl4/edit#gid=648633538')
+    sheet_instance = sheet.get_worksheet(1)
+    sheet_instance.insert_rows(tweets_df.values.tolist())
 
-    schedule.every().day.at("8:00").do(econ_ra)
-    schedule.every().day.at("8:05").do(tweets)
-    schedule.every().day.at("8:10").do(upload_gsheets)
 
-# # Loop so that the scheduling task
-# # keeps on running all time.
-    while True:
+# if __name__ == '__main__':
+#     print('Starting to be cool!')
+#     results = econ_ra()
+#     print('len is ', len(results))
+#     tweets = tweets(results)
+#     print('len res_tweets is ', len(tweets)) 
+#     upload_gsheets(tweets)
+#     print('Update completed...')
+#     print('I am done!')
+
+#     schedule.every().day.at("12:13").do(econ_ra)
+#     schedule.every().day.at("12:15").do(tweets)
+#     schedule.every().day.at("12:17").do(upload_gsheets)
+
+# # # Loop so that the scheduling task
+# # # keeps on running all time.
+#     while True:
  
-#     # Checks whether a scheduled task
-#     # is pending to run or not
-        schedule.run_pending()
-        time.sleep(1)
+# #     # Checks whether a scheduled task
+# #     # is pending to run or not
+#         schedule.run_pending()
+#         time.sleep(1)
