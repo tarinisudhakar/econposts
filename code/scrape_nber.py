@@ -70,18 +70,18 @@ def upload_gsheets(df):
 
     sheet = client.open('https://docs.google.com/spreadsheets/d/1X-R8QVhi2ngDTquGgpTwH_Vquj7DCFwROLhX2rQtEl4/edit#gid=1146760227')
     sheet_instance = sheet.get_worksheet(0)
-    sheet_instance.insert_rows(df.values.tolist())
+    sheet_instance.insert_rows(df.values.tolist()) 
 
 
-# if __name__ == '__main__':
-#     print('Starting to be cool!')
-#     result = nber_list()
-#     print('Length of data is ', len(result))
-#     posts = posts(result)
-#     print('Length of posts is ', len(posts)) 
-#     upload_gsheets(posts)
-#     print('Update completed...')
-#     print('I am done!')
+if __name__ == '__main__':
+    print('Starting to be cool!')
+    result = nber_list()
+    print('Length of data is ', len(result))
+    posts = posts(result)
+    print('Length of posts is ', len(posts)) 
+    upload_gsheets(posts)
+    print('Update completed...')
+    print('I am done!')
 
 # #     schedule.every().day.at("08:48").do(nber_list, result)
 # #     schedule.every().day.at("08:50").do(posts, posts)

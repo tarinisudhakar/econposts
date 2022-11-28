@@ -50,15 +50,15 @@ def upload_gsheets(tweets_df):
     sheet_instance.insert_rows(tweets_df.values.tolist())
 
 
-# if __name__ == '__main__':
-#     print('Starting to be cool!')
-#     results = econ_ra()
-#     print('len is ', len(results))
-#     tweets = tweets(results)
-#     print('len res_tweets is ', len(tweets)) 
-#     upload_gsheets(tweets)
-#     print('Update completed...')
-#     print('I am done!')
+if __name__ == '__main__':
+    print('Starting to be cool!')
+    results = econ_ra()
+    print('len is ', len(results))
+    tweets = tweets(results)
+    print('len res_tweets is ', len(tweets)) 
+    upload_gsheets(tweets)
+    print('Update completed...')
+    print('I am done!')
 
 #     schedule.every().day.at("12:13").do(econ_ra)
 #     schedule.every().day.at("12:15").do(tweets)
