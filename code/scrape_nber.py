@@ -45,11 +45,13 @@ class scheduleprint():
 
         df['Researcher'] = df['Researcher'].astype(str).apply(lambda row: split_util(row))
         df['Institution'] = df['Institution'].astype(str).apply(lambda row: split_util(row))
-        df['FieldofResearch'] = df['FieldofResearch'].astype(str).apply(lambda row: split_util(row))   
+        df['Institution'] = df['Institution'].str.split('[L]ink').str[0]
+        df['FieldofResearch'] = df['FieldofResearch'].astype(str).apply(lambda row: split_util(row))
+        df['FieldofResearch'] = df['FieldofResearch'].str.split('[L]ink').str[0]
 
+        print(df)   
 
-    #def upload_gsheets(df):
-        """Uploading to Google Sheets""" 
+        #Uploading to Google Sheets
         INPUT_DIR = "code"
         INPUT_PATH = os.path.join(INPUT_DIR, "econpostscred.json")
 
@@ -65,35 +67,19 @@ class scheduleprint():
         #d2g.upload(df, spreadsheet_key, wks_name, credentials=credentials, row_names=True)
 
         sheet = client.open('Economics RA listings_NBER and econ_ra')
-        sheet_instance = sheet.get_worksheet(0)
+        sheet_instance = sheet.get_worksheet(1)
         sheet_instance.update([df.columns.values.tolist()] + df.values.tolist())
         #sheet_instance.insert_rows(df.values.tolist()) 
 
-
-#if __name__ == '__main__':
-    # print('Starting to be cool!')
-    # #result = nber_list()
-    # #print('Length of data is ', len(result))
-    # df = nber_list(data)
-    # print('Length of posts is ', len(df)) 
-    # upload_gsheets(df)
-    # print('Update completed...')
-    # print('I am done!')
-
-
-    #def schedule_a_print_job(self, type = "Days", interval = 30): 
-    #    schedule.every(interval).seconds.do(self.nber_list)
     def schedule_a_print_job(self): 
-        schedule.every().day.at("08:50").do(self.nber_list)
-        #schedule.every().day.at("20:10").do(posts(dic))
-        #schedule.every().day.at("20:31").do(self.upload_gsheet)
+        schedule.every().day.at("11:50").do(self.nber_list)
 
-    # # Loop so that the scheduling task
-    # # keeps on running all time.
+        #Loop so that the scheduling task
+        #keeps on running all time.
         while True:
      
-    #     # Checks whether a scheduled task
-    #     # is pending to run or not
+        #Checks whether a scheduled task
+        #is pending to run or not
             schedule.run_pending()
             time.sleep(1)
 
